@@ -1,0 +1,31 @@
+.blog-header{
+    border-bottom: 1px solid black;
+    height: 50px;
+    font-size: 18px;
+}
+
+ul {
+    list-style-type: none;
+}
+
+#list-container{
+    width:20%;
+    border-right: 1px solid black;
+    height: 100%;
+    float:left;
+}
+
+#blog-container{
+
+}
+
+#new-blog{
+    width: 73%;
+    float:left;
+    height: 100%;
+    display: none;
+}
+
+#old-blog{
+    display: block;
+}

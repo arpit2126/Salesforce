@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+	<script src=node_modules/hogan.js/dist/hogan-3.0.2.js></script>
+	<link rel=stylesheet href="css/styles.css">
+</head>
+<body>
+	<header class="blog-header">
+		<h1>My Blog</h1>
+	</header>
+
+	<article id="list-container">
+	</article>
+
+	<article id="edit" style="display: none">
+	</article>
+	<article id="blog-container">
+		<div id="old-blog">
+
+		</div>
+		<div id="new-blog">
+			<div class="title">
+				<input type="text" class="blog-title-name">
+				<textarea class="blog-input" rows="4" cols="50">
+			</textarea>
+				<button id="create-blog">Create</button>
+			</div>
+		</div>
+
+	</article>
+	<script>
+		$(document).ready(function(){
+			// var baseUrl = 'https://restedblog.herokuapp.com/hackerrank/api/	';
+			var baseUrl = 'http://restedblog.herokuapp.com/shubham/api/';
+
+			doRestOperations('GET',baseUrl,createList);
+			function handleListClick(id){
+				let url = baseUrl + id;
+				doRestOperations('GET', url, populateBlogData);
+			}
+
+			function populateBlogData( data ) {
+				$('#old-blog').show();
+				$('#new-blog').hide();
+
+				let editButton = document.createElement('button');
+				let deleteButton = document.createElement('button');
+				editButton.setAttribute("class",'edit-blog');
+				deleteButton.setAttribute("class","delete-blog");
+				editButton.innerText = "Edit";
+				deleteButton.innerText = "Delete";
+				deleteButton.addEventListener('click',function(e){
+					deletePost();
+				});
+				editButton.addEventListener('click',(e) => {
+					editPost();
+				});
+				let blogTitle = document.createElement('div');
+				let blogText = document.createElement('div');
+				//let editButton = document.createElement('button');
+				blogTitle.setAttribute("class",'blog-title');
+				blogTitle.setAttribute("id",data.id);
+				blogText.setAttribute("class",'blog-text');
+				blogTitle.innerHTML = data.title;
+				blogText.innerHTML = data.text;
+				let blog = document.getElementById('old-blog');
+				blog.innerHTML = "";
+				blog.appendChild(blogTitle);
+				blog.appendChild(blogText);
+				blog.appendChild(editButton);
+				blog.appendChild(deleteButton);
+			}
+
+			function doRestOperations(type, baseUrl, callback, data){
+				$.ajax({
+					url: baseUrl,
+					type: type,
+					data: data,
+					success: function(result) {
+						// Do something with the result
+						callback(result);
+					}});
+			}
+
+			function createList(data){
+				let ul= document.createElement('ul');
+
+				data.map((list) => {
+					let li= document.createElement('li');
+					li.setAttribute("id",list.id);
+					li.addEventListener('click',function(e){
+						console.log(e.currentTarget.id);
+						handleListClick(e.currentTarget.id);
+					});
+					li.innerHTML="<span href=''>"+ list.title +"</span><span>"+ list.timestamp+ "</span>";
+					ul.appendChild(li);
+				});
+
+				let createPost= document.createElement('button');
+				createPost.innerHTML="<span>Create Post</span>";
+				createPost.addEventListener('click',function(){
+					$('#new-blog').show();
+					$('#old-blog').hide();
+				});
+
+				let bodyList = document.getElementById('list-container');
+				bodyList.appendChild(ul);
+				bodyList.appendChild(createPost);
+			}
+
+			let createBlog = document.getElementById('create-blog');
+			createBlog.addEventListener('click',function(e){
+				let data = {
+					title: $('.blog-title-name').val(),
+					text: $('.blog-input').val()
+				}
+
+				doRestOperations('POST', baseUrl, function(result){
+					console.log('==>Post request '+result);
+				}, data);
+
+			});
+
+			function deletePost(){
+				let url = baseUrl + $('.blog-title').attr('id');
+				doRestOperations('DELETE', url, function(result){
+					console.log('==>Post request '+result);
+				});
+			}
+
+			function editPost(data){
+				$('#new-blog').show();
+				$('#old-blog').hide();
+				$('.blog-title-name').val(data.title);
+				$('.blog-input').val(data.text);
+
+				let data = {
+					title: $('.blog-title-name').val(),
+					text: $('.blog-input').val()
+				};
+
+				doRestOperations('POST', baseUrl, function(result){
+					console.log('==>Post request '+result);
+				}, data);
+			}
+		});
+
+
+	</script>
+</body>
+</html>
